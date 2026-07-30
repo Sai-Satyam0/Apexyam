@@ -154,17 +154,6 @@ Play chess against the integrated Stockfish engine.
 
 
 
-## Music Module
-
-Plays Music from Youtube, we just have to name the song.
-
-![Chess](Apexyam_Images/Music.png)
-
-
----
-
-
-
 ## Memory Manager
 
 View stored conversations and memory.
