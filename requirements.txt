@@ -1,7 +1,7 @@
 streamlit
 python-dotenv==1.0.1
 requests==2.32.3
-SpeechRecognition==3.10.4
+SpeechRecognition
 edge-tts==6.1.12
 yt-dlp==2024.5.27
 python-chess==1.999
