@@ -1,0 +1,11 @@
+streamlit==1.35.0
+python-dotenv==1.0.1
+requests==2.32.3
+SpeechRecognition==3.10.4
+pygame==2.6.1
+edge-tts==6.1.12
+yt-dlp==2024.5.27
+python-chess==1.999
+stockfish==3.28.0
+pandas==2.2.2
+bcrypt==4.1.3
