@@ -1,104 +1,71 @@
 import os
 import tempfile
-import threading
 import asyncio
-import pygame
 import streamlit as st
+import edge_tts
 import config
-import speech_recognition as sr
-
-# Initialize pygame mixer once
-pygame.mixer.init()
 
 
-def speak(text: str) -> None:
-    """Convert text to speech and play it."""
+def _run_async(coro):
+    """
+    Safely run an async coroutine whether or not an event loop exists.
+    """
     try:
-        # Stop any existing audio
-        if pygame.mixer.music.get_busy():
-            pygame.mixer.music.stop()
+        loop = asyncio.get_running_loop()
+    except RuntimeError:
+        return asyncio.run(coro)
 
-        # Generate TTS audio
-        temp_file = os.path.join(tempfile.gettempdir(), "apexyam_tts.mp3")
+    new_loop = asyncio.new_event_loop()
+    try:
+        return new_loop.run_until_complete(coro)
+    finally:
+        new_loop.close()
 
-        async def generate_tts():
-            import edge_tts
-            communicate = edge_tts.Communicate(text, config.TTS_VOICE)
-            await communicate.save(temp_file)
 
-        asyncio.run(generate_tts())
+async def _generate_tts(text: str, output_file: str):
+    """
+    Generate speech using Edge-TTS.
+    """
+    communicate = edge_tts.Communicate(
+        text=text,
+        voice=config.TTS_VOICE
+    )
+    await communicate.save(output_file)
 
-        # Play audio
-        pygame.mixer.music.load(temp_file)
-        pygame.mixer.music.play()
 
-        # Wait for playback to finish
-        while pygame.mixer.music.get_busy():
-            pygame.time.wait(100)
+def speak(text: str):
+    """
+    Convert text to speech and play it in the browser.
+    """
+
+    try:
+        temp_file = os.path.join(
+            tempfile.gettempdir(),
+            "apexyam_tts.mp3"
+        )
+
+        _run_async(_generate_tts(text, temp_file))
+
+        with open(temp_file, "rb") as audio:
+            audio_bytes = audio.read()
+
+        st.audio(
+            audio_bytes,
+            format="audio/mp3",
+            autoplay=True
+        )
 
     except Exception as e:
-        st.error(f"Speech error: {str(e)}")
+        st.error(f"Speech Error: {e}")
 
 
-def speak_with_barge_in(text: str) -> str:
-    """Speak text while listening for interruption. Returns user speech if interrupted."""
-    try:
-        # Stop any existing audio
-        if pygame.mixer.music.get_busy():
-            pygame.mixer.music.stop()
+def speak_with_barge_in(text: str):
+    """
+    Streamlit version.
 
-        # Generate TTS audio
-        temp_file = os.path.join(tempfile.gettempdir(), "apexyam_tts.mp3")
+    Currently barge-in is not supported in the browser,
+    so this simply speaks the text.
+    """
 
-        async def generate_tts():
-            import edge_tts
-            communicate = edge_tts.Communicate(text, config.TTS_VOICE)
-            await communicate.save(temp_file)
-
-        asyncio.run(generate_tts())
-
-        # Start playing audio in background thread
-        interrupt_event = threading.Event()
-        user_speech = [None]
-
-        def play_audio():
-            try:
-                pygame.mixer.music.load(temp_file)
-                pygame.mixer.music.play()
-                while pygame.mixer.music.get_busy() and not interrupt_event.is_set():
-                    pygame.time.wait(50)
-                if interrupt_event.is_set():
-                    pygame.mixer.music.stop()
-            except Exception:
-                pass
-
-        audio_thread = threading.Thread(target=play_audio)
-        audio_thread.start()
-
-        # Listen for interruption
-        recognizer = sr.Recognizer()
-        try:
-            with sr.Microphone() as source:
-                recognizer.adjust_for_ambient_noise(source, duration=0.5)
-                try:
-                    audio = recognizer.listen(source, timeout=2, phrase_time_limit=3)
-                    # If we got here, user spoke
-                    interrupt_event.set()
-                    pygame.mixer.music.stop()
-
-                    try:
-                        user_text = recognizer.recognize_google(audio)
-                        user_speech[0] = user_text
-                    except sr.UnknownValueError:
-                        pass
-                except sr.WaitTimeoutError:
-                    pass  # No interruption
-        except Exception:
-            pass
-
-        audio_thread.join(timeout=3)
-        return user_speech[0]
-
-    except Exception as e:
-        st.error(f"Barge-in error: {str(e)}")
-        return None
+    speak(text)
+    return None
