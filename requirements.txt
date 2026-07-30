@@ -6,5 +6,5 @@ edge-tts==6.1.12
 yt-dlp==2024.5.27
 python-chess==1.999
 stockfish==3.28.0
-pandas==2.2.2
+pandas==2.3.2
 bcrypt==4.1.3
