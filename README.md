@@ -4,6 +4,13 @@ ApexYam is an AI-powered personal assistant built using Python and Streamlit. It
 
 The goal of this project is to demonstrate how multiple AI-driven utilities can be integrated into a unified and user-friendly desktop application.
 
+Live Demo:
+Deployment is currently unavailable because the project depends on
+Pygame for audio playback and desktop-specific features that are not
+supported by common cloud hosting platforms.
+
+A demonstration Screenshots are provided below.
+
 ---
 
 # Table of Contents
