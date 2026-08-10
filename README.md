@@ -231,7 +231,7 @@ ApexYam/
 Clone the repository.
 
 ```bash
-git clone https://github.com/your-username/ApexYam.git
+git clone https://github.com/Sai-Satyam0/ApexYam.git
 ```
 
 Move into the project directory.
