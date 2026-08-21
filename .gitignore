@@ -1,0 +1,30 @@
+# Secrets - NEVER commit these
+.env
+.env.*
+!.env.example
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyc
+*.pyo
+*.egg-info/
+.venv/
+venv/
+
+# Streamlit
+.streamlit/secrets.toml
+
+# Database
+*.db
+*.sqlite3
+
+# Downloaded/generated files
+downloads/
+assets/face_data/
+
+# OS/editor junk
+.DS_Store
+.vscode/
+.idea/
+*.log
