@@ -1,12 +1,8 @@
 import subprocess
-import pygame
 import streamlit as st
 import os
 import glob
 
-pygame.mixer.init()
-
-_current_audio = None
 DOWNLOAD_DIR = "downloads"
 
 os.makedirs(DOWNLOAD_DIR, exist_ok=True)
@@ -17,34 +13,31 @@ def cleanup_old_files():
     for f in files:
         try:
             os.remove(f)
-        except:
+        except Exception:
             pass
 
 
 def play(query: str) -> bool:
-    global _current_audio
-
     try:
         if not query.strip():
             st.error("Please enter a song name")
             return False
 
-        stop()
         cleanup_old_files()
 
         output_template = f"{DOWNLOAD_DIR}/song.%(ext)s"
 
         cmd = [
-    "yt-dlp",
-    "--extract-audio",
-    "--audio-format", "mp3",
-    "--ffmpeg-location", "/usr/bin",
-    "--js-runtimes", "node",
-    "-f", "bestaudio",
-    "--no-playlist",
-    "-o", output_template,
-    f"ytsearch1:{query}"
-]
+            "yt-dlp",
+            "--extract-audio",
+            "--audio-format", "mp3",
+            "--ffmpeg-location", "/usr/bin",
+            "--js-runtimes", "node",
+            "-f", "bestaudio",
+            "--no-playlist",
+            "-o", output_template,
+            f"ytsearch1:{query}"
+        ]
 
         result = subprocess.run(
             cmd,
@@ -66,10 +59,11 @@ def play(query: str) -> bool:
 
         audio_path = audio_files[0]
 
-        pygame.mixer.music.load(audio_path)
-        pygame.mixer.music.play()
+        with open(audio_path, "rb") as f:
+            audio_bytes = f.read()
 
-        _current_audio = audio_path
+        # Plays in the user's browser, not on the server
+        st.audio(audio_bytes, format="audio/mp3", autoplay=True)
 
         return True
 
@@ -83,22 +77,20 @@ def play(query: str) -> bool:
 
 
 def stop():
-    global _current_audio
-
-    try:
-        pygame.mixer.music.stop()
-
-        if _current_audio and os.path.exists(_current_audio):
-            os.remove(_current_audio)
-
-        _current_audio = None
-
-    except:
-        pass
+    """
+    No-op now: playback lives in the browser's <audio> element (rendered by
+    st.audio), which the server has no handle to. To let a user stop playback,
+    add a stop/replace control in the UI itself (e.g. only render st.audio
+    when a 'now playing' flag is set in st.session_state, and clear that flag
+    on a Stop button click).
+    """
+    cleanup_old_files()
 
 
 def is_playing():
-    try:
-        return pygame.mixer.music.get_busy()
-    except:
-        return False
+    """
+    No longer meaningful server-side — playback state now lives in the
+    browser. If you need to track this in your app logic, use
+    st.session_state (e.g. set a flag when you call play(), clear it on stop()).
+    """
+    return False
