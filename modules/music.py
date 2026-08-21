@@ -32,7 +32,6 @@ def play(query: str) -> bool:
             "--extract-audio",
             "--audio-format", "mp3",
             "--ffmpeg-location", "/usr/bin",
-            "--js-runtimes", "node",
             "-f", "bestaudio",
             "--no-playlist",
             "-o", output_template,
