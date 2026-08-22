@@ -12,7 +12,7 @@ Username: admin
 Password: SaiSatyam
 ```
 
-> Note: the app runs on a free Render instance, so it may take up to 50 seconds to wake up on the first visit after a period of inactivity.
+Note: the app runs on a free Render instance, so it may take up to 50 seconds to wake up on the first visit after a period of inactivity.
 
 A demonstration is also available via the screenshots below.
 
