@@ -12,7 +12,7 @@ TWILIO_AUTH_TOKEN = os.getenv("TWILIO_AUTH_TOKEN")
 TWILIO_PHONE_FROM = os.getenv("TWILIO_PHONE_FROM")
 
 DB_PATH = "apexyam.db"
-GROQ_MODEL = "llama-3.3-70b-versatile"
+GROQ_MODEL = "openai/gpt-oss-120b"
 TTS_VOICE = "en-US-JennyNeural"
 FACE_DATA_DIR = "assets/face_data"
 PERSONALITIES_DIR = "personalities"
