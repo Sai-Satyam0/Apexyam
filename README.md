@@ -212,8 +212,9 @@ Switch between different AI personalities.
 
 ---
 
-## project structure
+# Project Structure
 
+```
 ApexYam/
 │
 ├── app.py                     # Main Streamlit application & page routing
@@ -242,6 +243,8 @@ ApexYam/
 ├── personalities/              # Saved custom personality JSON profiles
 │
 └── Apexyam_Images/             # Screenshots used in this README
+```
+
 
 ---
 
