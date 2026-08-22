@@ -1,75 +1,67 @@
-import subprocess
+import requests
 import streamlit as st
-import os
-import glob
-
-DOWNLOAD_DIR = "downloads"
-
-os.makedirs(DOWNLOAD_DIR, exist_ok=True)
+import config
 
 
 def cleanup_old_files():
-    files = glob.glob(f"{DOWNLOAD_DIR}/*")
-    for f in files:
-        try:
-            os.remove(f)
-        except Exception:
-            pass
+    """No longer needed with Jamendo (no local downloads), kept for compatibility."""
+    pass
 
 
 def play(query: str) -> bool:
+    """Search Jamendo for a track and stream it directly to the browser."""
     try:
         if not query.strip():
             st.error("Please enter a song name")
             return False
 
-        cleanup_old_files()
+        if not config.JAMENDO_CLIENT_ID:
+            st.error("Jamendo client_id is not configured. Add JAMENDO_CLIENT_ID to your environment variables.")
+            return False
 
-        output_template = f"{DOWNLOAD_DIR}/song.%(ext)s"
+        params = {
+            "client_id": config.JAMENDO_CLIENT_ID,
+            "format": "json",
+            "limit": 1,
+            "search": query,
+            "audioformat": "mp32",  # 192kbps mp3
+        }
 
-        cmd = [
-            "yt-dlp",
-            "--extract-audio",
-            "--audio-format", "mp3",
-            "--ffmpeg-location", "/usr/bin",
-            "-f", "bestaudio",
-            "--no-playlist",
-            "-o", output_template,
-            f"ytsearch1:{query}"
-        ]
-
-        result = subprocess.run(
-            cmd,
-            capture_output=True,
-            text=True,
-            timeout=120
+        response = requests.get(
+            "https://api.jamendo.com/v3.0/tracks/",
+            params=params,
+            timeout=15,
         )
+        response.raise_for_status()
+        data = response.json()
 
-        if result.returncode != 0:
-            st.error(result.stderr)
+        results = data.get("results", [])
+        if not results:
+            st.error(f"No tracks found for '{query}' on Jamendo")
             return False
 
-        # Find downloaded file
-        audio_files = glob.glob(f"{DOWNLOAD_DIR}/*.mp3")
+        track = results[0]
+        audio_url = track.get("audio")
 
-        if not audio_files:
-            st.error("Audio download failed")
+        if not audio_url:
+            st.error("Track found but no audio URL available")
             return False
 
-        audio_path = audio_files[0]
+        # Fetch the actual audio bytes and stream them to the browser
+        audio_response = requests.get(audio_url, timeout=30)
+        audio_response.raise_for_status()
 
-        with open(audio_path, "rb") as f:
-            audio_bytes = f.read()
+        st.audio(audio_response.content, format="audio/mp3", autoplay=True)
 
-        # Plays in the user's browser, not on the server
-        st.audio(audio_bytes, format="audio/mp3", autoplay=True)
+        track_name = track.get("name", query)
+        artist_name = track.get("artist_name", "")
+        st.caption(f"🎵 {track_name} — {artist_name}" if artist_name else f"🎵 {track_name}")
 
         return True
 
-    except subprocess.TimeoutExpired:
-        st.error("Download timed out")
+    except requests.exceptions.RequestException as e:
+        st.error(f"Music error: {e}")
         return False
-
     except Exception as e:
         st.error(f"Music error: {e}")
         return False
@@ -77,19 +69,16 @@ def play(query: str) -> bool:
 
 def stop():
     """
-    No-op now: playback lives in the browser's <audio> element (rendered by
-    st.audio), which the server has no handle to. To let a user stop playback,
-    add a stop/replace control in the UI itself (e.g. only render st.audio
-    when a 'now playing' flag is set in st.session_state, and clear that flag
-    on a Stop button click).
+    No-op: playback lives in the browser's <audio> element, which the server
+    has no handle to. To let a user stop playback, track a 'now playing' flag
+    in st.session_state and only render st.audio when it's set.
     """
-    cleanup_old_files()
+    pass
 
 
 def is_playing():
     """
     No longer meaningful server-side — playback state now lives in the
-    browser. If you need to track this in your app logic, use
-    st.session_state (e.g. set a flag when you call play(), clear it on stop()).
+    browser. Track this via st.session_state if you need it in app logic.
     """
     return False
