@@ -28,6 +28,8 @@ def show_lock_screen():
 
         st.subheader("Login")
 
+        st.info("**Demo Login** — Username: `admin`  |  Password: `SaiSatyam`")
+
         username = st.text_input(
             "Username",
             placeholder="Enter your username"
