@@ -13,7 +13,7 @@ TWILIO_PHONE_FROM = os.getenv("TWILIO_PHONE_FROM")
 
 DB_PATH = "apexyam.db"
 GROQ_MODEL = "openai/gpt-oss-120b"
-JAMENDO_CLIENT_ID=4403332f
+JAMENDO_CLIENT_ID = os.getenv("JAMENDO_CLIENT_ID")
 TTS_VOICE = "en-US-JennyNeural"
 FACE_DATA_DIR = "assets/face_data"
 PERSONALITIES_DIR = "personalities"
