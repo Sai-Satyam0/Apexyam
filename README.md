@@ -212,24 +212,36 @@ Switch between different AI personalities.
 
 ---
 
-# Project Structure
+## project structure
 
-```
 ApexYam/
 │
-├── app.py
-├── config.py
-├── requirements.txt
-├── runtime.txt
+├── app.py                     # Main Streamlit application & page routing
+├── config.py                  # Environment variable loading & app settings
+├── requirements.txt           # Python dependencies
+├── runtime.txt                # Pinned Python version for deployment
 ├── README.md
-├── .env.example
+├── .env.example                # Template for required environment variables
 ├── .gitignore
 │
-├── assets/
-├── modules/
-├── personalities/
-└── Apexyam_Images/
-```
+├── assets/                    # Static assets used by the app
+│
+├── modules/                   # Core application logic, one file per feature
+│   ├── auth.py                 # Login / lock screen authentication
+│   ├── chatbot.py               # Groq-powered conversational AI
+│   ├── chess_engine.py          # Stockfish integration & board state
+│   ├── email_agent.py           # AI-generated email drafting
+│   ├── intent_engine.py         # Classifies voice commands into intents
+│   ├── memory.py                # SQLite-backed conversation history
+│   ├── music.py                 # Jamendo API search & playback
+│   ├── personality.py           # Custom AI personality profiles
+│   ├── voice_input.py           # Browser microphone recording & transcription
+│   ├── voice_output.py          # Text-to-speech playback
+│   └── weather.py               # Live weather lookups
+│
+├── personalities/              # Saved custom personality JSON profiles
+│
+└── Apexyam_Images/             # Screenshots used in this README
 
 ---
 
